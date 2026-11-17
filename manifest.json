@@ -1,0 +1,10 @@
+{
+  "name": "Theme Studio",
+  "authors": [{"name": "Voxxy"}],
+  "description": "An all-in-one in-app theme creator with live image backgrounds, custom colors, animations, and preset saving.",
+  "preview": "",
+  "readme": "README.md",
+  "homepage": "https://github.com/YOUR_USERNAME/spicetify-theme-studio",
+  "files": ["extension.js"],
+  "main": "extension.js"
+}
