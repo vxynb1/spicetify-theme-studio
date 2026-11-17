@@ -1,7 +1,12 @@
-// Custom App Page Entry Point (Renders when clicking the Brush Tab in Spotify)
+// Custom App Page Entry Point
 function render() {
-    const { React } = Spicetify;
-    const { useState, useEffect } = React;
+    const React = Spicetify.React;
+    if (!React) {
+        return null;
+    }
+
+    const { useState } = React;
+    const el = React.createElement;
 
     const SECTIONS = [
         { id: "colors", label: "🎨 Colors & Gradients" },
@@ -14,8 +19,46 @@ function render() {
 
     function ThemeStudioApp() {
         const [cfg, setCfg] = useState(() =>
-            window.getThemeStudioConfig ? window.getThemeStudioConfig() : {}
+            window.getThemeStudioConfig ? window.getThemeStudioConfig() : {
+                name: "Cyber Neon Studio",
+                bgColor: "#0f0f13",
+                sidebarColor: "#09090c",
+                cardColor: "#181820",
+                playerColor: "#121218",
+                textColor: "#ffffff",
+                subTextColor: "#a0a0b5",
+                accentColor: "#1db954",
+                useGradientBg: false,
+                gradColor1: "#1a0b2e",
+                gradColor2: "#09192f",
+                gradAngle: "135",
+                gradAnimate: true,
+                bgImage: "",
+                bgBlur: "8",
+                bgOpacity: "0.75",
+                bgBrightness: "100",
+                bgSaturation: "110",
+                bgKenBurns: false,
+                trailType: "sparkles",
+                trailColor: "#1db954",
+                trailRainbow: true,
+                trailSize: "6",
+                trailEmoji: "✨",
+                clickEffect: "ripple",
+                clickColor: "#1db954",
+                buttonSquish: true,
+                cardHoverLift: true,
+                ambientParticles: "fireflies",
+                crtScanlines: false,
+                vignette: false,
+                spinAlbumArt: false,
+                pulsePlayBtn: true,
+                fontFamily: "",
+                borderRadius: "10",
+                customCSS: ""
+            }
         );
+
         const [activeTab, setActiveTab] = useState("colors");
         const [presets, setPresets] = useState(() => {
             try {
@@ -38,7 +81,9 @@ function render() {
             const updatedPresets = { ...presets, [presetName]: cfg };
             setPresets(updatedPresets);
             localStorage.setItem("ts_saved_presets", JSON.stringify(updatedPresets));
-            Spicetify.ShowNotification(`Saved preset "${presetName}"!`);
+            if (Spicetify.showNotification) {
+                Spicetify.showNotification(`Saved preset "${presetName}"!`);
+            }
         };
 
         const loadPreset = (presetObj) => {
@@ -46,7 +91,9 @@ function render() {
             if (window.applyThemeStudioConfig) {
                 window.applyThemeStudioConfig(presetObj);
             }
-            Spicetify.ShowNotification(`Loaded "${presetObj.name}"`);
+            if (Spicetify.showNotification) {
+                Spicetify.showNotification(`Loaded "${presetObj.name}"`);
+            }
         };
 
         const deletePreset = (name) => {
@@ -57,12 +104,14 @@ function render() {
         };
 
         const resetDefault = () => {
-            const def = window.ThemeStudioDefault || {};
+            const def = window.ThemeStudioDefault || cfg;
             setCfg(def);
             if (window.applyThemeStudioConfig) {
                 window.applyThemeStudioConfig(def);
             }
-            Spicetify.ShowNotification("Reset to default studio preset");
+            if (Spicetify.showNotification) {
+                Spicetify.showNotification("Reset to default studio preset");
+            }
         };
 
         const handleImageUpload = (e) => {
@@ -95,7 +144,9 @@ function render() {
                         const parsed = JSON.parse(ev.target.result);
                         loadPreset(parsed);
                     } catch (err) {
-                        Spicetify.ShowNotification("Invalid theme JSON!", true);
+                        if (Spicetify.showNotification) {
+                            Spicetify.showNotification("Invalid theme JSON!", true);
+                        }
                     }
                 };
                 reader.readAsText(file);
@@ -103,11 +154,8 @@ function render() {
             input.click();
         };
 
-        // Helper UI builders (Using React.createElement since Spicetify CustomApps do not compile JSX)
-        const el = React.createElement;
-
         const ColorPicker = (label, key) =>
-            el("div", { style: { display: "flex", flexDirection: "column", gap: "6px", background: "rgba(255,255,255,0.04)", padding: "12px", borderRadius: "8px" } },
+            el("div", { key, style: { display: "flex", flexDirection: "column", gap: "6px", background: "rgba(255,255,255,0.04)", padding: "12px", borderRadius: "8px" } },
                 el("span", { style: { fontSize: "13px", fontWeight: "600" } }, label),
                 el("div", { style: { display: "flex", alignItems: "center", gap: "10px" } },
                     el("input", {
@@ -126,7 +174,7 @@ function render() {
             );
 
         const Toggle = (label, desc, key) =>
-            el("label", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(255,255,255,0.04)", padding: "12px 16px", borderRadius: "8px", cursor: "pointer" } },
+            el("label", { key, style: { display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(255,255,255,0.04)", padding: "12px 16px", borderRadius: "8px", cursor: "pointer" } },
                 el("div", null,
                     el("div", { style: { fontWeight: "600", fontSize: "14px" } }, label),
                     desc ? el("div", { style: { fontSize: "12px", opacity: 0.7 } }, desc) : null
@@ -140,7 +188,7 @@ function render() {
             );
 
         const Slider = (label, key, min, max, step, unit) =>
-            el("div", { style: { display: "flex", flexDirection: "column", gap: "6px", background: "rgba(255,255,255,0.04)", padding: "12px 16px", borderRadius: "8px" } },
+            el("div", { key, style: { display: "flex", flexDirection: "column", gap: "6px", background: "rgba(255,255,255,0.04)", padding: "12px 16px", borderRadius: "8px" } },
                 el("div", { style: { display: "flex", justifyContent: "space-between", fontSize: "13px", fontWeight: "600" } },
                     el("span", null, label),
                     el("span", { style: { color: cfg.accentColor } }, `${cfg[key]}${unit}`)
@@ -157,7 +205,7 @@ function render() {
             );
 
         const SelectBox = (label, key, options) =>
-            el("div", { style: { display: "flex", flexDirection: "column", gap: "6px", background: "rgba(255,255,255,0.04)", padding: "12px 16px", borderRadius: "8px" } },
+            el("div", { key, style: { display: "flex", flexDirection: "column", gap: "6px", background: "rgba(255,255,255,0.04)", padding: "12px 16px", borderRadius: "8px" } },
                 el("span", { style: { fontSize: "13px", fontWeight: "600" } }, label),
                 el("select", {
                     value: cfg[key],
@@ -166,13 +214,11 @@ function render() {
                 }, options.map((opt) => el("option", { key: opt.val, value: opt.val }, opt.label)))
             );
 
-        return el("div", { style: { padding: "28px 36px", maxWidth: "1200px", margin: "0 auto", color: "var(--spice-text)" } },
+        return el("div", { style: { padding: "28px 36px", maxWidth: "1200px", margin: "0 auto", color: "var(--spice-text, #fff)", overflowY: "auto", height: "100%" } },
             // Header Bar
             el("div", { style: { display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "16px", marginBottom: "24px", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "20px" } },
                 el("div", null,
-                    el("h1", { style: { fontSize: "28px", fontWeight: "800", margin: "0 0 4px 0", display: "flex", alignItems: "center", gap: "10px" } },
-                        "🖌️ Theme Studio"
-                    ),
+                    el("h1", { style: { fontSize: "28px", fontWeight: "800", margin: "0 0 4px 0" } }, "🖌️ Theme Studio"),
                     el("p", { style: { margin: 0, opacity: 0.7, fontSize: "14px" } }, "Customize colors, animated backgrounds, cursor trails, click explosions, and layout physics.")
                 ),
                 el("div", { style: { display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" } },
@@ -214,8 +260,7 @@ function render() {
                             color: activeTab === sec.id ? "#000" : "#fff",
                             border: "none",
                             fontWeight: "700",
-                            cursor: "pointer",
-                            transition: "all 0.15s ease"
+                            cursor: "pointer"
                         }
                     }, sec.label)
                 )
@@ -223,7 +268,7 @@ function render() {
 
             // Active Tab Content Grid
             el("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px", marginBottom: "32px" } },
-                activeTab === "colors" && [
+                activeTab === "colors" ? [
                     ColorPicker("Accent & Highlights", "accentColor"),
                     ColorPicker("Main Background", "bgColor"),
                     ColorPicker("Sidebar Background", "sidebarColor"),
@@ -236,10 +281,10 @@ function render() {
                     ColorPicker("Gradient End Color", "gradColor2"),
                     Slider("Gradient Angle", "gradAngle", 0, 360, 5, "°"),
                     Toggle("Animate Gradient Flow", "Smoothly waves the gradient colors continuously", "gradAnimate")
-                ],
+                ] : null,
 
-                activeTab === "background" && [
-                    el("div", { style: { gridColumn: "1 / -1", background: "rgba(255,255,255,0.04)", padding: "16px", borderRadius: "8px", display: "flex", flexDirection: "column", gap: "10px" } },
+                activeTab === "background" ? [
+                    el("div", { key: "bg-upload", style: { gridColumn: "1 / -1", background: "rgba(255,255,255,0.04)", padding: "16px", borderRadius: "8px", display: "flex", flexDirection: "column", gap: "10px" } },
                         el("span", { style: { fontWeight: "700" } }, "Background Image or Animated GIF (URL or Local File)"),
                         el("div", { style: { display: "flex", gap: "10px", flexWrap: "wrap" } },
                             el("input", {
@@ -264,9 +309,9 @@ function render() {
                     Slider("Wallpaper Brightness", "bgBrightness", 20, 180, 5, "%"),
                     Slider("Wallpaper Saturation", "bgSaturation", 0, 200, 5, "%"),
                     Toggle("Ken Burns Slow Zoom", "Cinematic slow zoom and pan motion on your wallpaper", "bgKenBurns")
-                ],
+                ] : null,
 
-                activeTab === "cursor" && [
+                activeTab === "cursor" ? [
                     SelectBox("Mouse Trail Style", "trailType", [
                         { val: "none", label: "Disabled" },
                         { val: "sparkles", label: "✨ Glowing Sparkles" },
@@ -277,7 +322,7 @@ function render() {
                     ColorPicker("Trail Color", "trailColor"),
                     Toggle("Rainbow RGB Cycle", "Automatically shifts trail color through the full spectrum", "trailRainbow"),
                     Slider("Trail Size / Thickness", "trailSize", 2, 20, 1, "px"),
-                    el("div", { style: { display: "flex", flexDirection: "column", gap: "6px", background: "rgba(255,255,255,0.04)", padding: "12px 16px", borderRadius: "8px" } },
+                    el("div", { key: "trail-emoji", style: { display: "flex", flexDirection: "column", gap: "6px", background: "rgba(255,255,255,0.04)", padding: "12px 16px", borderRadius: "8px" } },
                         el("span", { style: { fontSize: "13px", fontWeight: "600" } }, "Custom Trail Emoji (when Emoji mode is selected)"),
                         el("input", {
                             type: "text",
@@ -286,9 +331,9 @@ function render() {
                             style: { padding: "8px 12px", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontSize: "18px" }
                         })
                     )
-                ],
+                ] : null,
 
-                activeTab === "clicks" && [
+                activeTab === "clicks" ? [
                     SelectBox("Mouse Click Explosion", "clickEffect", [
                         { val: "none", label: "Disabled" },
                         { val: "ripple", label: "🌊 Shockwave Ripple" },
@@ -299,9 +344,9 @@ function render() {
                     ColorPicker("Click Effect Color", "clickColor"),
                     Toggle("Tactile Button Squish", "Buttons bounce and squish physically when clicked", "buttonSquish"),
                     Toggle("3D Card Hover Lift", "Album & playlist cards float upward when hovered", "cardHoverLift")
-                ],
+                ] : null,
 
-                activeTab === "ambient" && [
+                activeTab === "ambient" ? [
                     SelectBox("Ambient Screen Particles", "ambientParticles", [
                         { val: "none", label: "None" },
                         { val: "fireflies", label: "🪲 Glowing Fireflies (Accent Colored)" },
@@ -313,10 +358,10 @@ function render() {
                     Toggle("Spinning Vinyl Album Art", "Turns the Now Playing cover into a rotating vinyl record", "spinAlbumArt"),
                     Toggle("Retro CRT Scanlines", "Adds subtle horizontal monitor scanlines across the screen", "crtScanlines"),
                     Toggle("Cinematic Edge Vignette", "Darkens the outer edges of Spotify for deep focus", "vignette")
-                ],
+                ] : null,
 
-                activeTab === "layout" && [
-                    el("div", { style: { display: "flex", flexDirection: "column", gap: "6px", background: "rgba(255,255,255,0.04)", padding: "12px 16px", borderRadius: "8px" } },
+                activeTab === "layout" ? [
+                    el("div", { key: "font-input", style: { display: "flex", flexDirection: "column", gap: "6px", background: "rgba(255,255,255,0.04)", padding: "12px 16px", borderRadius: "8px" } },
                         el("span", { style: { fontSize: "13px", fontWeight: "600" } }, "Google Font Name (e.g. Poppins, Orbitron, JetBrains Mono)"),
                         el("input", {
                             type: "text",
@@ -327,7 +372,7 @@ function render() {
                         })
                     ),
                     Slider("Corner Roundness (Border Radius)", "borderRadius", 0, 32, 1, "px"),
-                    el("div", { style: { gridColumn: "1 / -1", display: "flex", flexDirection: "column", gap: "6px", background: "rgba(255,255,255,0.04)", padding: "16px", borderRadius: "8px" } },
+                    el("div", { key: "raw-css", style: { gridColumn: "1 / -1", display: "flex", flexDirection: "column", gap: "6px", background: "rgba(255,255,255,0.04)", padding: "16px", borderRadius: "8px" } },
                         el("span", { style: { fontSize: "14px", fontWeight: "700" } }, "Raw Custom CSS (Override any element to the last bit)"),
                         el("textarea", {
                             rows: 6,
@@ -337,7 +382,7 @@ function render() {
                             style: { width: "100%", padding: "12px", background: "rgba(0,0,0,0.55)", border: "1px solid rgba(255,255,255,0.15)", color: "#00ff9d", fontFamily: "monospace", fontSize: "13px" }
                         })
                     )
-                ]
+                ] : null
             ),
 
             // Saved Presets Drawer
@@ -366,5 +411,5 @@ function render() {
         );
     }
 
-    return React.createElement(ThemeStudioApp);
+    return el(ThemeStudioApp);
 }
