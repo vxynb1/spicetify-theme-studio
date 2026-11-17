@@ -1,11 +1,17 @@
-# 🎨 Spicetify Theme Studio
+# 🖌️ Spicetify Theme Studio
 
-An interactive theme builder extension for Spicetify that gives you full control over colors, background images, animations, custom CSS, and preset saving directly inside Spotify.
+A full-page custom tab for Spicetify that lets you customize every detail of Spotify: colors, animated gradient wallpapers, local/GIF backgrounds, mouse trails, click explosions, ambient particles, fonts, and raw CSS—with built-in preset saving.
 
-## Installation
+![Preview](preview.png)
 
-1. Make sure you have Spicetify installed.
-2. Run the following command in your terminal to install this extension:
-```bash
-spicetify config custom_apps spicetify-theme-studio
-# Or add it directly as an extension
+## Manual Installation
+
+1. Download or clone this repository (`index.js`, `engine.js`, and `manifest.json`).
+2. Open your Spicetify `CustomApps` folder:
+   - **Windows:** Press `Win + R`, type `%appdata%\spicetify\CustomApps`, and press Enter.
+   - **Mac / Linux:** `~/.config/spicetify/CustomApps/`
+3. Create a folder named `theme-studio` inside `CustomApps` and place `index.js`, `engine.js`, and `manifest.json` inside it.
+4. Run these commands in your terminal:
+   ```bash
+   spicetify config custom_apps theme-studio
+   spicetify apply
